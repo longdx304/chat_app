@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       return ChatScreen();
     }
     return Center(
-      child: Text('Loading...'),
+      child: CircularProgressIndicator(),
     );
   }
 

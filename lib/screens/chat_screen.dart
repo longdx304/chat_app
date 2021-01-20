@@ -30,7 +30,11 @@ class ChatScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          messages.add({
+            'text': 'This was added by clicking button',
+          }).catchError((error) => print('Failed to add user: $error'));
+        },
         child: Icon(Icons.add),
       ),
     );

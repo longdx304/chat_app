@@ -8,21 +8,29 @@ class ChatScreen extends StatelessWidget {
         .collection('chats/L6G6DeTGPzMla48dc3w0/messages');
 
     return Scaffold(
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, index) => Container(
-          padding: EdgeInsets.all(8),
-          child: Text('This works!'),
-        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: messages.snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError)
+            return Center(
+              child: Text('An error occurred...'),
+            );
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          final documents = snapshot.data.docs;
+          return ListView.builder(
+            itemCount: documents.length,
+            itemBuilder: (context, index) => Container(
+              padding: EdgeInsets.all(8),
+              child: Text(documents[index].data()['text']),
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          messages.snapshots().listen((snapshop) {
-            snapshop.docs.forEach((doc) {
-              print(doc['text']);
-            });
-          });
-        },
+        onPressed: () {},
         child: Icon(Icons.add),
       ),
     );

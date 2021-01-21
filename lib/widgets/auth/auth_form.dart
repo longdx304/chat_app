@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
@@ -12,14 +14,40 @@ class _AuthFormState extends State<AuthForm> {
   var _userName = '';
   var _isLoginMode = true;
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return;
     FocusScope.of(context).unfocus();
     _formKey.currentState.save();
-    print(_userEmail);
-    print(_userPassword);
-    print(_userName);
+    if (!_isLoginMode) {
+      try {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _userEmail.trim(),
+          password: _userPassword,
+        );
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user.uid)
+            .set({
+          'username': _userName,
+          'email': _userEmail,
+        });
+      } on FirebaseAuthException catch (e) {
+        var errorMessage = 'An error occurred, please check your credentials!';
+        if (e.message != null) {
+          errorMessage = e.message;
+        }
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Theme.of(context).errorColor,
+          ),
+        );
+      } catch (e) {
+        print(e);
+      }
+    }
   }
 
   @override

@@ -15,6 +15,7 @@ class _AuthFormState extends State<AuthForm> {
   void _submitForm() {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return;
+    FocusScope.of(context).unfocus();
     _formKey.currentState.save();
     print(_userEmail);
     print(_userPassword);

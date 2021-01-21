@@ -21,10 +21,12 @@ class _AuthFormState extends State<AuthForm> {
 
     FocusScope.of(context).unfocus();
     _formKey.currentState.save();
-    if (!_isLoginMode) {
-      try {
-        setState(() => _isLoading = true);
-        UserCredential userCredential =
+
+    try {
+      setState(() => _isLoading = true);
+      UserCredential userCredential;
+      if (!_isLoginMode) {
+        userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _userEmail.trim(),
           password: _userPassword,
@@ -36,23 +38,25 @@ class _AuthFormState extends State<AuthForm> {
           'username': _userName,
           'email': _userEmail,
         });
-        setState(() => _isLoading = false);
-      } on FirebaseAuthException catch (e) {
-        var errorMessage = 'An error occurred, please check your credentials!';
-        if (e.message != null) {
-          errorMessage = e.message;
-        }
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Theme.of(context).errorColor,
-          ),
-        );
-        setState(() => _isLoading = false);
-      } catch (e) {
-        print(e);
-        setState(() => _isLoading = false);
+      } else {
+        userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _userEmail.trim(), password: _userPassword);
       }
+    } on FirebaseAuthException catch (e) {
+      var errorMessage = 'An error occurred, please check your credentials!';
+      if (e.message != null) {
+        errorMessage = e.message;
+      }
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+      setState(() => _isLoading = false);
+    } catch (e) {
+      print(e);
+      setState(() => _isLoading = false);
     }
   }
 

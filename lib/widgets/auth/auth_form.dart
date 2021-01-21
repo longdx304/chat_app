@@ -13,14 +13,17 @@ class _AuthFormState extends State<AuthForm> {
   var _userPassword = '';
   var _userName = '';
   var _isLoginMode = true;
+  var _isLoading = false;
 
   Future<void> _submitForm() async {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return;
+
     FocusScope.of(context).unfocus();
     _formKey.currentState.save();
     if (!_isLoginMode) {
       try {
+        setState(() => _isLoading = true);
         UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _userEmail.trim(),
@@ -33,6 +36,7 @@ class _AuthFormState extends State<AuthForm> {
           'username': _userName,
           'email': _userEmail,
         });
+        setState(() => _isLoading = false);
       } on FirebaseAuthException catch (e) {
         var errorMessage = 'An error occurred, please check your credentials!';
         if (e.message != null) {
@@ -44,8 +48,10 @@ class _AuthFormState extends State<AuthForm> {
             backgroundColor: Theme.of(context).errorColor,
           ),
         );
+        setState(() => _isLoading = false);
       } catch (e) {
         print(e);
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -104,17 +110,20 @@ class _AuthFormState extends State<AuthForm> {
                     ),
                   ),
                   SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: _submitForm,
-                    child: Text(_isLoginMode ? 'Login' : 'Signup'),
-                  ),
-                  TextButton(
-                    onPressed: () =>
-                        setState(() => _isLoginMode = !_isLoginMode),
-                    child: Text(_isLoginMode
-                        ? 'Create new account'
-                        : 'I already have an account'),
-                  )
+                  if (_isLoading) CircularProgressIndicator(),
+                  if (!_isLoading)
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      child: Text(_isLoginMode ? 'Login' : 'Signup'),
+                    ),
+                  if (!_isLoading)
+                    TextButton(
+                      onPressed: () =>
+                          setState(() => _isLoginMode = !_isLoginMode),
+                      child: Text(_isLoginMode
+                          ? 'Create new account'
+                          : 'I already have an account'),
+                    ),
                 ],
               ),
             ),

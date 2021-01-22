@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/chat/messages.dart';
+import '../widgets/chat/new_message.dart';
 
 class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    CollectionReference messages = FirebaseFirestore.instance
-        .collection('chats/L6G6DeTGPzMla48dc3w0/messages');
-
     return Scaffold(
       appBar: AppBar(
         title: Text('FlutterChat'),
@@ -41,14 +38,15 @@ class ChatScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Messages(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          messages.add({
-            'text': 'This was added by clicking button',
-          }).catchError((error) => print('Failed to add user: $error'));
-        },
-        child: Icon(Icons.add),
+      body: Container(
+        child: Column(
+          children: [
+            Expanded(
+              child: Messages(),
+            ),
+            NewMessage(),
+          ],
+        ),
       ),
     );
   }

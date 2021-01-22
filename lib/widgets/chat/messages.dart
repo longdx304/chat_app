@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 import 'message_bubble.dart';
 
 class Messages extends StatelessWidget {
+  final Stream<QuerySnapshot> chatMessages = FirebaseFirestore.instance
+      .collection('chat')
+      .orderBy(
+        'createdAt',
+        descending: true,
+      )
+      .snapshots();
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('chat')
-          .orderBy(
-            'createdAt',
-            descending: true,
-          )
-          .snapshots(),
+      stream: chatMessages,
       builder:
           (BuildContext context, AsyncSnapshot<QuerySnapshot> chatSnapshot) {
         if (chatSnapshot.hasError)

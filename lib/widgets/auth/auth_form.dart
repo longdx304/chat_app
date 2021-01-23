@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../pickers/user_image_picker.dart';
+
 class AuthForm extends StatefulWidget {
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -74,6 +76,7 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!_isLoginMode) UserImagePicker(),
                   TextFormField(
                     key: ValueKey('email'),
                     onSaved: (newValue) => _userEmail = newValue,

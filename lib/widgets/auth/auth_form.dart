@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../pickers/user_image_picker.dart';
@@ -16,6 +19,11 @@ class _AuthFormState extends State<AuthForm> {
   var _userName = '';
   var _isLoginMode = true;
   var _isLoading = false;
+  File _pickedFile;
+
+  void _pickImage(File image) {
+    _pickedFile = image;
+  }
 
   Future<void> _submitForm() async {
     final isValid = _formKey.currentState.validate();
@@ -33,12 +41,17 @@ class _AuthFormState extends State<AuthForm> {
           email: _userEmail.trim(),
           password: _userPassword,
         );
+        final storageRef = FirebaseStorage.instance
+            .ref('user_images/${userCredential.user.uid}.jpg');
+        await storageRef.putFile(_pickedFile);
+        String imageUrl = await storageRef.getDownloadURL();
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user.uid)
             .set({
           'username': _userName,
           'email': _userEmail,
+          'image_url': imageUrl,
         });
       } else {
         userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -76,7 +89,7 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!_isLoginMode) UserImagePicker(),
+                  if (!_isLoginMode) UserImagePicker(_pickImage),
                   TextFormField(
                     key: ValueKey('email'),
                     onSaved: (newValue) => _userEmail = newValue,

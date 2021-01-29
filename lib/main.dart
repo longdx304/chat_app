@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'screens/chat_screen.dart';
@@ -10,54 +11,89 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
-  Widget _buildHomeScreen(AsyncSnapshot snapshot) {
-    if (snapshot.hasError) {
+class _MyAppState extends State<MyApp> {
+  bool _initialized = false;
+  bool _error = false;
+
+  void initializeFlutterFire() async {
+    try {
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+      });
+    } catch (e) {
+      setState(() {
+        _error = false;
+      });
+    }
+  }
+
+  void requestNotificationPers() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+    print('User granted permission: ${settings.authorizationStatus}');
+  }
+
+  @override
+  void initState() {
+    initializeFlutterFire();
+    super.initState();
+  }
+
+  Widget _buildHomeScreen() {
+    if (_error) {
       return Center(
         child: Text('An error occured...'),
       );
     }
-    if (snapshot.connectionState == ConnectionState.done) {
-      return StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, user) {
-          if (user.hasData) return ChatScreen();
-          return AuthScreen();
-        },
+    if (!_initialized) {
+      return Center(
+        child: CircularProgressIndicator(),
       );
     }
-    return Center(
-      child: CircularProgressIndicator(),
+    requestNotificationPers();
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, user) {
+        if (user.hasData) return ChatScreen();
+        return AuthScreen();
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initialization,
-      builder: (context, snapshot) {
-        return MaterialApp(
-          title: 'FlutterChat',
-          theme: ThemeData(
-            primarySwatch: Colors.pink,
-            backgroundColor: Colors.pink,
-            accentColor: Colors.deepPurple,
-            accentColorBrightness: Brightness.dark,
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
+    return MaterialApp(
+      title: 'FlutterChat',
+      theme: ThemeData(
+        primarySwatch: Colors.pink,
+        backgroundColor: Colors.pink,
+        accentColor: Colors.deepPurple,
+        accentColorBrightness: Brightness.dark,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 25),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          home: _buildHomeScreen(snapshot),
-        );
-      },
+        ),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: _buildHomeScreen(),
     );
   }
 }

@@ -65,6 +65,12 @@ class _MyAppState extends State<MyApp> {
       );
     }
     requestNotificationPers();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a foreground message with data: ${message.data}');
+      if (message.notification != null) {
+        print('Message also contain a noti: ${message.notification}');
+      }
+    });
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, user) {

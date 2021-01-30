@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
 
   void requestNotificationPers() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
+    await messaging.requestPermission(
       alert: true,
       announcement: false,
       badge: true,
@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
       provisional: false,
       sound: true,
     );
-    print('User granted permission: ${settings.authorizationStatus}');
+    messaging.subscribeToTopic('chat');
   }
 
   @override

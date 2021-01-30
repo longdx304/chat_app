@@ -55,8 +55,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    initializeFlutterFire();
     super.initState();
+    initializeFlutterFire();
   }
 
   Widget _buildHomeScreen() {

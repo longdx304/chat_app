@@ -6,10 +6,10 @@ admin.initializeApp();
 exports.chatNotification = functions.firestore
     .document("chat/{messageId}")
     .onCreate((snapshot, context) => {
-      admin.messaging().sendToTopic('chat', {
-          notification: {
-              title: snapshot.data().username,
-              body: snapshot.data().text,
-          }
+      admin.messaging().sendToTopic("chat", {
+        notification: {
+          title: snapshot.data().username,
+          body: snapshot.data().text,
+        },
       });
     });

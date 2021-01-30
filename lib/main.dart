@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/chat_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -86,6 +87,8 @@ class _MyAppState extends State<MyApp> {
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, user) {
+        if (user.connectionState == ConnectionState.waiting)
+          return SplashScreen();
         if (user.hasData) return ChatScreen();
         return AuthScreen();
       },
